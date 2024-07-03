@@ -23,7 +23,7 @@ namespace CompanyA
 
 namespace CompanyB
 {
-    int num;
+    int num; // 다른 파일에 이미 똑같이 되어있따면, 여기 앞에 extern을 붙여주어야 함
 }
 
 int main()
