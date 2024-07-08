@@ -33,7 +33,7 @@ public:
     string _name;
 
 public:
-    void attack(Player3& target)
+    void attack(Player3& target) // 여기서 &룰 안쓰면 value로 넘어가서 그냥 그떄뿐 깎이고 끝나지, 실제 target의 것이 깎인게 아님
     {
         cout << "Attack " << _name << "->" << target._name << endl;
         target.damaged(_power);
