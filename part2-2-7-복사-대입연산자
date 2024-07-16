@@ -1,0 +1,175 @@
+// BadPerson.h
+#pragma once
+#pragma warning(disable: 4996)
+#include <iostream>
+
+
+class BadPerson
+{
+private:
+    float _weight;
+    float _height;
+    char* _name;
+
+public:
+    BadPerson() {}
+    BadPerson(float weight, float height, const char* name)
+        : _weight(weight), _height(height), _name(new char[strlen(name) + 1])
+    {
+        strcpy(_name, name);
+    }
+
+    ~BadPerson()
+    {
+        delete[] _name; // 복사된 녀석들이 중복 삭제 된다. 주소값만 복사 됐기 때문
+        // 복사를 할 때 얕은 복사를 해서 문제가 되는 것임
+        // 주소만 복사가 됐고 contents가 복사된게 아님
+        // person0가 먼저 끝나버리면 person1, person2에 주소값도 둥둥 떠다님
+        // 제대로 복사가 안된것임
+    }
+
+    void print() const
+    {
+        using namespace std;
+        cout << _name << endl;
+        cout << _weight << endl;
+        cout << _height << endl;
+    }
+};
+
+
+
+
+// GoodPerson.h
+#pragma once
+#pragma warning(disable: 4996)
+#include <iostream>
+
+
+class GoodPerson
+{
+private:
+    float _weight;
+    float _height;
+    char* _name;
+
+public:
+    GoodPerson() {}
+    GoodPerson(float weight, float height, const char* name)
+        : _weight(weight), _height(height), _name(new char[strlen(name) + 1])
+    {
+        strcpy(_name, name);
+    }
+
+    // 1. 위임 생성자를 통한 깊은 복사
+    GoodPerson(const GoodPerson& person)
+        : GoodPerson(person._weight, person._height, person._name) // 위임 생성자
+    {
+
+    }
+
+    ~GoodPerson()
+    {
+        delete[] _name; // 복사된 녀석들이 중복 삭제 된다.
+    }
+
+    // 2. 연산자 오버로딩을 이용한 깊은 복사
+    GoodPerson& operator=(const GoodPerson& person)
+    {
+        _weight = person._weight;
+        _height = person._height;
+        delete[] _name;
+
+        _name = new char[strlen(person._name) + 1];
+        strcpy(_name, person._name);
+        return *this;
+    }
+
+    void print() const
+    {
+        using namespace std;
+        cout << _name << endl;
+        cout << _weight << endl;
+        cout << _height << endl;
+    }
+};
+
+
+
+
+// main.cpp
+#include <iostream>
+#include "BadPerson.h"
+#include "GoodPerson.h"
+
+using namespace std;
+
+
+
+int func(int x)
+{
+    return x; // 복사
+}
+
+int func(Person person)
+{
+    // param으로 넘어오면서 복사가 일어남
+    // 위임 생성자를 통한 깊은 복사로 들어옴
+}
+
+int func(Person &person)
+{
+    // 위임 생성자를 통한 복사 일어나지 않음
+    // 내부적으로 포인터 벨류만 복사되기 때문
+}
+
+int func(Person person)
+{
+    // func(Person{ 46.f, 153.f, "David Daehee Kim" }); 으로 호출시
+    // 복사가 안일어남
+}
+
+Person func(Person person)
+{
+    // return 하면서 Person으로 복사가 발생
+    // Person p;
+    // return p; 하면 또 복사 안일어남
+    // call by value 참조!
+}
+
+
+int main()
+{
+    int a = 1;
+    int b = a; // 복사 생성자
+    a = b;  // 대입 연산자
+
+    func(a); // 복사
+
+
+    //BadPerson badPerson0{ 46.f, 153.f, "David Daehee Kim" };
+    //BadPerson badPerson1 = badPerson0;
+    //BadPerson badPerson2;
+    //badPerson2 = badPerson0;
+
+    //badPerson0.print();
+    //badPerson1.print();
+    //badPerson2.print();
+
+    GoodPerson goodPerson0 = { 46.f, 153.f, "David Daehee Kim" }; 
+    GoodPerson goodPerson1 = goodPerson0;
+    GoodPerson goodPerson2;
+    goodPerson2 = goodPerson0;
+
+    goodPerson0.print();
+    goodPerson1.print();
+    goodPerson2.print();
+
+
+
+
+    GoodPerson goodPerson0 = { 46.f, 153.f, "David Daehee Kim" }; 
+    func(person0);
+
+
+}
