@@ -1,0 +1,46 @@
+#include <iostream>
+#include <functional>
+
+using namespace std;
+
+
+class Person
+{
+public:
+    void print(int i)
+    {
+        cout << i << endl;
+    }
+
+    static void staticPrint(int i)
+    {
+        cout << i << endl;
+    }
+};
+
+int main()
+{
+   // 멤버 변수는 무조건 명시적으로 &Person::print; 해서 변환시켜 주어야 함
+    void (Person:: * fn)(int) = &Person::print;
+
+    Person person;
+    // fn(1); 하면 안됨
+    // 그냥 하면 this 를 print할 때 넘겨주어야  하는데, this 가 없어서 안되는것임.
+    (person.*fn)(1); // this를 넘겨줘야 함
+
+    typedef void (Person::* Func0)(int); // typedef 를 사용하여 간략히 표기
+    Func0 fn0 = &Person::print;
+    (person.*fn0)(2);
+
+    using Func1 = void (Person::*)(int);
+    Func1 fn1 = &Person::print;
+    (person.*fn1)(3);
+
+    function<void(Person*, int)> fn2 = &Person::print;
+    fn2(&person, 4);
+
+
+    // static은 일반 함수와 동일
+    void (*fn3)(int) = &Person::staticPrint;
+    fn3(5);
+}
