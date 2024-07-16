@@ -1,0 +1,125 @@
+// Person.cpp
+#include <iostream>
+#include "Person.h"
+
+using namespace std;
+
+// 클래스 멤버 변수 초기화
+// static 변수라서 한 번은 초기화가 필요함
+// 클래스 안에는 선언만 됨
+int Person::num0 = 0;
+int Person::num1 = 0;
+const int Person::num2 = 0; // const 초기화 (대입이 아님, 아니면 inline으로 =0;으로 header파일에서 바로 가능)
+
+
+Person::Person()
+{
+    num0++;
+}
+
+
+void Person::print()
+{
+    cout << num0 << endl;
+}
+
+void Person::staticPrint()
+{
+    cout << num0 << endl;
+    //print(); // 비 정적 멤버 접근 불가, 즉 this가 없다
+}
+
+void personFunc()
+{
+    Person p0;
+    Person p1;
+
+    p0.print();
+    p1.print();
+
+
+    // public static 멤버 접근
+    cout << Person::num1 << endl;
+
+    Person::staticPrint();
+    p0.staticPrint();
+}
+
+
+
+
+// Person.h
+#pragma once
+
+class Foo; // // static Foo foo; 이렇게 할꺼면 전방 선언으로 class Foo;로만 가능.
+
+class Person
+{
+private:
+    static int num0; // 선언이지 정의를 해주지 않았음. 초기화를 따로 해줘야 실제 메모리에 올라가게 됨
+public:
+    static int num1;
+    static const int num2; (num2 = 0; 로 inline화 가능, const를 지우면 기본적으로 안됨.
+    // 되게할려면 버전을 c++17로 바꿔서 inline static int num = 0;로 초기화 가능.)
+    // 어떤 static class를 초기화하려면 
+    // inline static Foo num = Foo(); 이런식으로 할려고 하면
+    // Foo가 어떤 모양으로 되어있는지 알고 있어야 함. 그래서 전방 선언으로 class Foo; 하면 안됨.
+    // static Foo foo; 이렇게 할꺼면 전방 선언으로 class Foo;로만 가능.
+
+    Person();
+    void print();
+    static void staticPrint(); // 뒤에 const를 붙일 수 없다. 얘한테는 this가 넘어가지 않기 떄문
+    // static은 객체가 없어도 불릴 수 있기 때문
+    // this가 없기 떄문에 일반 멤버 변수에도 접근이 되지 않음. public 이라 하더라도.
+    // 일반 멤버 변수에도 접근 불가능함.
+    // 왜 ? stait은 this라는 개념이 없기 떄문에 객체가 없어서 안됨.
+    // 따라서
+    // 정적 멤버 함수에서는 정적 멤버 변수만 접근 가능하다.
+};
+
+// int Person::num0 = 0; 정의를 해줄 수는 있지만
+// 다른 파일에서 이 header파일을 include하게되면 또 여러 번 정의해주는 꼴이 됨.
+// 따라서 cpp 파일에서 해주어야 함.
+void personFunc();
+
+
+
+
+// auto_static.h
+#pragma once
+#include <iostream>
+
+
+void autoStatic()
+{
+    using namespace std;
+
+    for (int i = 0; i < 10; ++i)
+    {
+        int autoVar = 0; // ¸Å¹ø ÇÒ´ç
+        autoVar++;
+        cout << "auto : " << autoVar << endl;
+
+        static int staticVar = 0; // 1부터 계속 증가
+        staticVar++;
+        cout << "static : " << staticVar << endl;
+    }
+}
+
+
+
+
+// main.cpp
+#include <iostream>
+#include "auto_static.h"
+#include "Person.h"
+
+using namespace std;
+
+int main()
+{
+    autoStatic();
+    personFunc();
+
+    
+}
