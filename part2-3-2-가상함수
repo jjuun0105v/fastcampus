@@ -145,6 +145,8 @@ int main()
     foo(b); // Base
     foo(d); // Derived
 
+    // base class에 virtual이라 하고 derived class에 virtual을 따로 안써져도 암묵적으로 virtual이 있는것처럼 된다
+
 
     Player player(100, 10);
     Monster monster(200, 20);
