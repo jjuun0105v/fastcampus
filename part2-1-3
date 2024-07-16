@@ -1,0 +1,235 @@
+#pragma once
+#include <iostream>
+
+using namespace std;
+
+
+class Player0
+{
+private:
+    int _health;
+    int _power;
+
+public:
+    Player0()
+    {
+        // 디폴트 생성자(파라메터가 한 개도 없는 생성자)
+        // 한 개의 생성자도 주어지지 않는다면 컴파일러가 암시적으로 만들어준다
+        _health = 100;
+        _power = 50;
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+    Player0(int health, int power)
+    {
+        _health = health;
+        _power = power;
+
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+};
+
+void player0()
+{
+    // 위에 두 개의 생성자 전부 선언하지 않는다면, 이 밑에 3줄이 전부 수행되지 않는다
+    // 특별 멤버 함수 : 컴파일러가 자동으로 지정하는 함수, 디폴트 생성자
+    // 생성자가 정의되어 있지 않으면 컴파일러가 자동으로 디폴트 새성자를 만들어냄
+    // 그렇기 떄문에 두 개 생성자를 전부 다 없애버리면 인자를 넘기는 생성자에 대해서는 특별 멤버 함수가 되지 않아 에러
+    Player0 player0(100, 50);
+    Player0 player1 = Player0(300, 150);
+    Player0* player2 = new Player0(400, 250);
+
+
+    // 디폴트 생성자가 없으면 밑에꺼는 실행될 수 없음
+    Player0 player3;
+    Player0 player4 = Player0();
+    Player0* player5 = new Player0();
+}
+
+
+
+
+class Player1
+{
+private:
+    int _health;
+    int _power;
+
+public:
+    Player1(int health = 100, int power = 50) // 디폴트 파라메터를 이용하여 중복 제거
+    {
+        _health = health;
+        _power = power;
+
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+};
+
+void player1()
+{
+    Player1 player0(100, 50);
+    Player1 player1 = Player1(300, 150);
+    Player1* player2 = new Player1(400, 250);
+
+
+    Player1 player3;
+    Player1 player4 = Player1();
+    Player1* player5 = new Player1();
+
+
+    Player1 player6(300); // health만으로 초기화 될 수 있음
+}
+
+
+
+
+class Player2
+{
+private:
+    int _health;
+    int _power;
+
+public:
+    Player2()
+    {
+        // 중복 제거를 위해 Player2(int, int)를 호출한 듯 보이지만 실제로는 Player2를 한 번 더 생성
+        // 이 안에서 player를 하나 더 만든것임
+        // Player player = Player(100, 50); 과 같음
+        // 이를 방지하기 위해서는
+        // 디폴트 생성자 옆에 : Player2(100, 50, "noname") // 위임 생성자 delegate consturctor
+        // 이렇게 해주어야 나중에 .print() 호출시 넘겨준 값이 제대로 나옴
+        Player2(100, 50); 
+    }
+    Player2(int health, int power)
+    {
+        _health = health;
+        _power = power;
+
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+
+    void print()
+    {
+        cout << _health << endl;
+        cout << _power << endl;
+    }
+};
+
+void player2()
+{
+    Player2 player;ㅅ
+    player.print(); // 쓰레기 값 호출
+}
+
+
+
+
+class Player3
+{
+private:
+    int _health;
+    int _power;
+
+public:
+    Player3() : Player3(100, 50) // // 이렇게 해야 원하는 값이 정상적으로 호출됨
+    {
+    }
+    Player3(int health, int power)
+    {
+        _health = health;
+        _power = power;
+
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+
+    void print()
+    {
+        cout << _health << endl;
+        cout << _power << endl;
+    }
+};
+
+void player3()
+{
+    Player3 player;
+    player.print(); // 이렇게 해야 원하는 값이 정상적으로 호출됨
+}
+
+
+
+
+class Player4
+{
+private:
+    int _health; // int health = 100; 이런식으로도 할 수도 있다. 그러면 위임 생성자를 안해줘도 됨.
+    int _power;
+    const string _name;
+
+public:
+    Player4() : Player4(100, 50, "noname") // 위임 생성자 delegate consturctor
+    {
+    }
+    Player4(int health, int power, string name)
+        : _health(health), _power(power), _name(name) // 멤버 초기화 리스트 (member initailize list),
+        // 초기화 순서는 클래스에 선언된 순서
+    {
+        // 아래는 대입 연산들, 즉, 멤버 변수들은 초기화 (기본 생성자가 이미 호출 된 상태) 
+        // 기본 생성자를 통한 초기화 후, 대입 연산자가 호출되게 되면서 성능에도 문제가 있을 수 있음
+        //_health = health;
+        //_power = power;
+        //_name = name; const여서 상수가 이미 초기화가 되어 있어서 안 됨
+
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+
+    void print()
+    {
+        cout << _name << endl;
+        cout << _health << endl;
+        cout << _power << endl;
+    }
+};
+
+void player4()
+{
+    Player4 player;
+    player.print();
+}
+
+
+
+
+class Player5
+{
+private:
+    // 인라인 초기화
+    int _health = 100;
+    int _power = 50;
+    const string _name = "noname";
+
+public:
+    Player5() = default; // 컴파일러가 만든 생성자를 사용하겠다는 것을 명시
+    //Player5() = delete; // 컴파일러가 생성자를 암시적으로 만들지 말 것을 명시
+    Player5(int health, int power, string name)
+        : _health(health), _power(power), _name(name)
+    {
+
+        cout << "Player " << _health << ", " << _power << endl;
+    }
+
+    void print()
+    {
+        cout << _name << endl;
+        cout << _health << endl;
+        cout << _power << endl;
+    }
+};
+
+void player5()
+{
+    Player5 player;
+    player.print();
+}
+
+
+
+
