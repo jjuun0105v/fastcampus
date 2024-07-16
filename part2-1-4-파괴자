@@ -1,0 +1,110 @@
+#pragma once
+#include <iostream>
+
+using namespace std;
+
+class Player
+{
+private:
+    int _num;
+
+public:
+    Player(int num) : _num(num)
+    {
+        cout << "Constroctor : " << _num << endl;
+    }
+
+    ~Player() // 파괴자(소멸자), 항상 파라메터가 없음, 명시하지 않아도 컴파일러가 만들어줌
+    {
+        cout << "Destructor : " << _num << endl;
+    }
+};
+
+// 일단 여기 정적 영역에 대한 constructor 먼저 수행됨
+Player player0(0);
+Player* player1 = new Player(1); // player1은 해제 되지만 *player1은 해제가 되지 않음
+// 사실 1번은 해제가 됐지만 1번이 가리키는 녀석이 해제가 안됐다
+
+
+void func()
+{
+    // 지역 정적
+    static Player player2(2);
+}
+
+
+void player()
+{
+    // 생성과 삭제를 확인해보자
+    Player player3(3); // scope를 벗어나면서 파괴자 호출
+    Player* player4 = new Player(4);
+    {
+        Player player5(5); // 지역으로 할당됐기 떄문에 scope를 벗어나면서 소멸자 호출
+        Player* player6 = new Player(6); // delete를 수동으로 안 해줬기 문에 해제 되지 않는다. *player6은 해제되지 않음
+    }
+    delete player4; // delete를 대놓고 써줬기 떄문에 destructor 호출됨
+    func();
+    func(); // static은 한 번만 생성 되기 때문에 두 번째 호출 시에도 생성되지 않는다
+
+    // constructor 0, 1, 3, 4, 5, 6
+    // destructor 5, 4
+    // constructor 2
+    // destructor 3, 2, 0 // 지역 정적 해제후, 정적 영역 해제
+}
+
+
+
+#pragma once
+#pragma warning(disable:4996)
+
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+
+class String
+{
+private:
+    char* _str;
+
+public:
+    String(const char* str)
+    {
+        int len = strlen(str);
+        _str = new char[len + 1]; // '\0;
+        strcpy(_str, str);
+    }
+
+    ~String()
+    {
+        delete[] _str; // 파괴자에서 해제를 해줘야한다
+    }
+
+    void print()
+    {
+        cout << _str << endl;
+    }
+};
+
+
+void stringFunc()
+{
+    String str("abc");
+    str.print();
+}
+
+
+
+
+#include <iostream>
+#include "Player.h"
+#include "String.h"
+
+using namespace std;
+
+int main()
+{
+    player();
+    stringFunc();
+}
