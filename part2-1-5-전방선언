@@ -1,8 +1,13 @@
+// 함수 구현 : 정의를 포함한 선언
+// 함수 prototype : 정의를 포함하지 않는 선언
+// 중복 정의는 안됨 c++은 단일 정의 원칙이 있음
+
 // Village.cpp
 #include "Villiage.h"
-#include "person.h"
+#include "person.h" // 구현할려고 하는 부분에는 class Person;이 아니라 #include가 필요함
 
-
+// 넘어갈 때 복사를 해준다거나 대입을 해준다거나 하는 일이 발생하게 되면서
+// Person 내부 모양을 알아야 하기 때문에 #include 필요하다는 것임
 void Villiage::add(Person* person)
 {
 
@@ -11,20 +16,25 @@ void Villiage::add(Person* person)
 
 
 // Village.h
-#pragma once
+#pragma once // header file을 include할 때 한 번만 하겠다
+// 사실 이건 비표준 방법이고 #ifndef 로 해서 header파일 해주는게 적당히 충돌 안날 것 같은 이름으로 해준것임
 
 #include <vector>
 
 //#include "person.h" // 헤더 파일 include는 최소화 하자
 
 
-class Person; // 전반 선언
+class Person; // 전방 선언, 물론 include해도 되긴함.
+// #include는 복사/붙여넣기 해주게 되기 때문에
+// Person.h가 붙여넣기가 되면서 Person.h가 변경되면 Village.h도 변경되게 되고,
+// Village.h를 include한 애들도 다 변경이 되게되는것임
 class Villiage
 {
 private:
     // 전방 선언을 위해서는 포인터나 레퍼런스 형이어야 함.
     // 포인터나 레퍼런스는 사이즈가 알려져있기 문
-    std::vector<Person*> persons;
+    std::vector<Person*> persons; // person안에 어떤 method가 있는지까지 몰라도 되는 상태.
+    // 이때는 Person.h를 include하는것보다는 전방 선언으로 해주는 것이 좋다
 public:
     void add(Person* person);
 };
@@ -124,11 +134,18 @@ private:
 
 public:
     Person(float weight, float height, const std::string& name);
-    void print();
+    void print(); // // 같은 원리로 class 내에서도 함수를 prototype만 선언하고 cpp파일에 정의함
+    // 이렇게 분리하면 장점 : header를 include하게되면 print를 할 수 있다 정도이지
+    // 그 안에 어떻게 생겼는지까지는 궁금하지 않은 것이다.
+    // 캡슐화의 일부임
+    // inline으로 함수를 처리한것처럼 됨
 };
 
 
 // 함수의 선언
+// 정의를 해놓게되면 다른 파일에서 Person.h를 inlucde하게되는 순간 정의를 또 할려고 한다고 하면서 error가 나기 때문에
+// prototype과 정의를 header파일과 cpp파일을 통해 분리시킴
+// 같은 원리로 class 내에서도 함수를 prototype만 선언하고 cpp파일에 정의함
 void foo();
 
 
@@ -141,6 +158,13 @@ using namespace std;
 
 
 // Person의 중복 정의 가능, 그렇지만 똑같이 정의 해야함
+// 한 파일 내에서는 한 번만 정의되어야 함
+// 다른 파일에서는 각각 정의를 해도 됨
+// 열거형, class, inline 등등 예외로 one definition이 지켜지지 않아도 됨
+// 똑같이 정의를 해주어야만 one definition 룰을 적용시켜줌
+// 매번 이렇게 다른 파일에서 그 class 를 사용하기 위해서 매번 복사 붙여넣기를 한다?
+// 변경때마다 다른 파일도 그럼 전부 다 변경해주어야 한다
+// 그래서 header 파일 사용이 필요해짐
 //class Person
 //{
 //private:
@@ -173,7 +197,11 @@ using namespace std;
 #pragma once
 
 #include "person.h" // 중복 정의 실수 방지를 위해 header 파일을 만들어서 include 한다
-
+// class Person;만 가지고는 Person의 저 생성자가 어떻게 생겨먹었는지 모르기 때문에 안된다
+// header는 컴파일 되지 않는다
+// .cpp 파일만 컴파일 되고 header는 복사 붙여넣기만 되는거다
+// 함수를 한 번만 정의할려면 foo를 Person.h에 정의를 해두지 말고 선언만 해두고, Person.cpp에 정의를 해준다
+// Person.h에는 void foo(); Person.cpp에는 정의
 
 void foo1()
 {
