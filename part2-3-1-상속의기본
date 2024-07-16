@@ -1,0 +1,122 @@
+#include <iostream>
+
+using namespace std;
+
+class Base
+{
+public:
+    Base()
+    {
+        cout << "Base" << endl;
+    }
+
+    Base(int num) : num(num)
+    {
+        cout << "Base(" << num << ")" << endl;
+    }
+
+    virtual ~Base() // 부모 클래스가 될 가능성이 있는 녀석들의 소멸자는 virtual을 추가해준다
+    {
+        cout << "~Base" << endl;
+    }
+
+    int num;
+
+    void func()
+    {
+        cout << num << endl;
+    }
+
+private:
+    int priNum;
+
+protected:
+    int proNum;
+};
+
+
+class Derived : public Base
+{
+public:
+    // 생성자를 상속하고 싶은 경우 using을 이용한다.
+    // Base(int num): num(num)
+    // 이런 부모 클래스의 생성자들을 상속받을 수 있게된다.
+    //using Base::Base;
+
+    // Derived() = delete; 라고 하면 이 디폴트 생성자는 상속받기 싫다 라고 나타낼 수 있다.
+    // 이 상태에서 Derived d; 하면 error 발생
+
+    Derived() // 부모 생성자를 지정하지 않으면 부모의 디폴트 생성자를 실행해준다.
+    {
+        cout << "Derived" << endl;
+    }
+
+    // protected num으로 하면 Derived에서 초기화가 가능하긴 하지만, 좋은 방법은 아님
+    // 차라리 base class 생성자 호출로 위임해주는 것이 좋음
+    Derived(int num) : Base(num) // 자식 생성자에서 어떤 부모 생성자를 호출할지 결정해준다
+    {
+        cout << "Derived(" << num << ")" << endl;
+    }
+
+    ~Derived()
+    {
+        cout << "~Derieved" << endl;
+    }
+
+    void foo()
+    {
+        // 부모의 멤버에 접근
+        func();
+        this->func();
+
+        num += 20;
+        func();
+
+        //this->priNum = 20; private 으로 부모에서 선언 됐기 때문에 접근 불가, 메모리에는 존재
+        this->proNum = 30; // protected는 자식에게 공개 됨
+    }
+
+    void func1()
+    {
+
+    }
+};
+
+
+void func(Base& b)
+{
+  // b.func();
+}
+
+
+int main()
+{
+    Base b;
+    b.num = 10;
+    b.func();
+
+    Derived d; // 부모의 생성자가 먼저 호출 된다. 
+    d.num = 20;  // 부모의 num
+    d.func(); // 부모의 func
+    d.foo();
+
+    //d.priNum = 20; // private으로 부모에서 선언 되어서 사용할 수 없다
+    //d.proNum = 30; // protected로 부모에서 선언 되어서 사용할 수 없다
+
+    // 부모 클래스는 자식 클래스를 가리킬 수 있다
+    Base* base = new Derived;
+
+    // 자식 파괴자가 먼저 호출된다.
+    // base class의 소멸자에 virtual이 없으면 base class의 소멸자만 호출됨
+    // base class의 소멸자에 virtual을 붙여야 Derived, Base class 순으로 소멸자가 호출됨
+    // 내가 삭제를 해주는데 실제 가리키는 녀석이 자식일때 base class의 소멸자에 virtual이 있어야 한다.
+    delete base;
+
+    // Derived d; 
+    // Base &b = d; // reference는 기본적으로 포인터로 구현되어 있음
+    // func(b); 하지 않아도 func(d);를 하여 자식을 넘길 수 있다
+    // 이렇게 하면 base class의 함수를 호출해 줄 수 있다.
+
+    // 부모가 자식을 가리킬 수 있기 때문에 부모 클래스를 타입으로 가지는 파라메터에 자식 객체를 넘겨줄 수 있다
+    func(d);
+}
