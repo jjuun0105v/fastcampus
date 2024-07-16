@@ -1,0 +1,83 @@
+#include <iostream>
+
+using namespace std;
+
+
+class Person
+{
+private:
+    const string _name = "david"; // const 멤버 변수는 인라인으로 초기화 가능
+    float _weight;
+    float _height;
+
+public:
+    Person(const string& name, float weight, float height)
+        : _name(name), _weight(weight), _height(height) // const 멤버 변수는 멤버 초기화 리스트에서 초기화 가능
+    {
+        // 여기서 name은 변경 불가능
+    }
+
+    float getWeight(/* const Person* this */) const // const 가 함수 뒤에 붙었다는건 저런식으로 넘어온다는것임
+    {
+
+        // const가 붙은 멤버 함수에서의 this 포인터의 타입
+        // const Person*
+        // this->weight = 10; this가 가리키는 애가 const로 넘어왔기 떄문에 변경이 불가능함
+        return _weight;
+    }
+
+    float getHeight(/* Person* this */)
+    {
+        // this 포인터의 타입
+        // Person*
+
+        return _height;
+    }
+};
+int main()
+{
+    // 근데 person을 바꾸기 싫어서 const로 선언해버리면, getWeight에서는 const가 없다고 해도
+    // getWeight시 const Person으로 넘어왔을 것임
+    // 하지만 함수 뒤에 const가 없으면 Person *this 로 가져오게 되면서
+    // const -> 일반 Person으로의 변환이 필요해지는데, 못 바꾸기 때문에 안된다
+    const Person person("David", 75.f, 181.f);
+    cout << person.getWeight() << endl; // getWeight에 const Person*가 넘어간다.
+    //cout << person.getHeight() << endl; // getHeight에 const Person*을 넘길 수 없다.
+
+    // const 없는 person 선언에 getWeight 함수에도 const가 없었다면
+    Person person("David", 75.f, 181.f);
+    cout << person.getWeight() << endl; // getWeight 가능
+
+
+    // Person person0("Daniel", 56.f, 174.f);
+    // const Person person1 = person0;
+    // 값을 const로 변환하는 것은 된다.
+
+    // const Person person0("Daniel", 56.f, 174.f);
+    // Person person1 = person0;
+    // 일반 Person에 const를 넣는 것도 가능하다. 값이기 때문에.
+    // 값이라서 사실 복사가 일어났기 때문에, Person0, Person1은 다른 애가 됨
+
+    // 하지만, 포인터가 되면 얘기가 달라짐 /////////
+
+
+    Person *person0 = new Person("Daniel", 57.f, 175.f);
+    const Person* person1 = person0; // 변환 가능 (일반 포인터를 const가 가리킬 수 있다)
+    //Person* person2 = person1; // 변환 불가능
+
+
+    const Person *person0 = new Person("Daniel", 57.f, 175.f);
+    Person* person1 = person0; // 변환 불가능. 일반 pointer는 const를 가리킬 수 없음.
+    // person1 입장에서는 person1->weight로 바꿀 수 있는건데, const가지고 만들어지게 되면 이 값을 또 바꿀 수가 있게되는거라
+    // 허용이 안되는게 맞다
+    // 반대는 문제가 없다.
+
+    // 따라서 const pointer는 일반 포인터로 변환 불가하고,
+    // 일반 포인터는 const pointer로 변환 가능하다.
+
+    // weight가 private에 있고
+    // consot Person person0("Daniel", 56.f, 174.f);
+    // person0.getWeight(); 하면
+    // Person *t = &person0; const 객체가 보내지게 되는데, 함수는 const가 아니므로 일반 포인터로의 변형이 필요해지고
+    // const에서 일반 포인터로의 변환은 불가하기 때문에 안된다.
+}
