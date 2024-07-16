@@ -1,0 +1,182 @@
+// Village.cpp
+#include "Villiage.h"
+#include "person.h"
+
+
+void Villiage::add(Person* person)
+{
+
+}
+
+
+
+// Village.h
+#pragma once
+
+#include <vector>
+
+//#include "person.h" // 헤더 파일 include는 최소화 하자
+
+
+class Person; // 전반 선언
+class Villiage
+{
+private:
+    // 전방 선언을 위해서는 포인터나 레퍼런스 형이어야 함.
+    // 포인터나 레퍼런스는 사이즈가 알려져있기 문
+    std::vector<Person*> persons;
+public:
+    void add(Person* person);
+};
+
+
+
+// function.h
+#pragma once
+
+#include <iostream>
+
+using namespace std;
+
+
+// 함수 선언, 정의가 포함되지 않은 선언
+void func();
+
+// t수 정의, 선언이지만 정의가 포함
+void func()
+{
+    cout << "func" << endl;
+}
+
+// 한 번 더 정의 하게 되면 중복 정의(컴파일이 안 됨)
+//void func()
+//{
+//    cout << "func" << endl;
+//}
+
+
+
+// main.cpp
+#include <iostream>
+#include "function.h"
+#include "Villiage.h"
+#include "person.h"
+
+using namespace std;
+
+
+void foo1(); // util1.cpp
+
+int main()
+{
+    func();
+    foo1();
+
+    Villiage v;
+    v.add(new Person(10, 10, "david"));
+}
+
+
+
+// person.cpp
+#include "person.h"
+
+
+// Person 클래스 함수들의 정의 분리
+Person::Person(float weight, float height, const std::string& name)
+    : _weight(_weight), _height(height), _name(name)
+{
+
+}
+
+void Person::print()
+{
+    using namespace std;
+    cout << _name << endl;
+}
+
+
+// 함수의 정의 분리
+void foo()
+{
+    Person p(60.f, 160.f, "davoid");
+    p.print();
+}
+
+
+
+// person.h
+#pragma once
+
+// #pragma once -> 헤더파일은 한 번만 include 하도록 함, 비표준
+// #ifndef #define #endif -> 헤더파일을 한 번만 include 하도록 함, 표준
+#include <iostream>
+#include <string>
+
+
+// Person 클래스의 선언 분리
+class Person
+{
+private:
+    float _weight;
+    float _height;
+    const std::string _name;
+
+public:
+    Person(float weight, float height, const std::string& name);
+    void print();
+};
+
+
+// 함수의 선언
+void foo();
+
+
+
+// util0.cpp
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+// Person의 중복 정의 가능, 그렇지만 똑같이 정의 해야함
+//class Person
+//{
+//private:
+//    float _weight;
+//    float _height;
+//    const string _name;
+//
+//public:
+//    Person(float weight, float height, const string& name)
+//        : _weight(_weight), _height(height), _name(name)
+//    {
+//
+//    }
+//
+//    void print()
+//    {
+//        cout << _name << endl;
+//    }
+//};
+//
+//void foo0()
+//{
+//    Person p(50.f, 171.f, "daniel");
+//    p.print();
+//}
+
+
+
+// util1.cpp
+#pragma once
+
+#include "person.h" // 중복 정의 실수 방지를 위해 header 파일을 만들어서 include 한다
+
+
+void foo1()
+{
+    Person p(50.f, 171.f, "david");
+    p.print();
+}
